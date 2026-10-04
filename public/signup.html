@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign up — Trend</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="authpage">
+  <div class="authcard">
+    <div class="logo">trend</div>
+    <h1>Create your account</h1>
+    <p class="sub">Post your takes and start voting.</p>
+    <div class="autherr" id="err"></div>
+    <div id="googleBtnWrap" style="display:none;margin-bottom:16px">
+      <a href="/auth/google" class="authbtn" style="display:block;text-align:center;text-decoration:none;background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)">Continue with Google</a>
+      <div style="text-align:center;color:var(--muted);font-size:12px;margin:14px 0">or</div>
+    </div>
+    <form id="form">
+      <div class="field"><label>Name</label><input type="text" id="name" required autocomplete="name"></div>
+      <div class="field"><label>Email</label><input type="email" id="email" required autocomplete="email"></div>
+      <div class="field"><label>Password</label><input type="password" id="password" required minlength="6" autocomplete="new-password"></div>
+      <button class="authbtn" type="submit">Sign up</button>
+    </form>
+    <div class="authswitch">Already have an account? <a href="login.html">Log in</a></div>
+  </div>
+</div>
+<script src="app.js"></script>
+<script>
+if (Trend.getToken()) location.href = 'app.html';
+Trend.api('/api/config').then((c) => { if (c.googleEnabled) document.getElementById('googleBtnWrap').style.display = 'block'; }).catch(() => {});
+{
+  const params = new URLSearchParams(location.search);
+  const prefill = params.get('email');
+  if (prefill) document.getElementById('email').value = prefill;
+}
+document.getElementById('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('err'); err.classList.remove('show');
+  try {
+    const { token, user } = await Trend.api('/api/signup', 'POST', {
+      name: document.getElementById('name').value,
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value
+    });
+    Trend.setSession(token, user);
+    location.href = 'onboarding.html';
+  } catch (ex) { err.textContent = ex.message; err.classList.add('show'); }
+});
+</script>
+</body>
+</html>

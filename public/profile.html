@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — Trend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="top">
+  <div class="nav-in">
+    <a href="app.html" style="text-decoration:none;color:inherit" class="logo">trend</a>
+    <div class="tabs">
+      <a href="app.html" style="text-decoration:none"><button>Feed</button></a>
+      <a href="app.html#markets" style="text-decoration:none"><button>Markets</button></a>
+      <a href="app.html#chat" style="text-decoration:none"><button>Ask Trend</button></a>
+    </div>
+    <button class="avatar-btn" id="avatarBtn">?</button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="pf-cover" id="pfCover"></div>
+  <div class="pf-head">
+    <div class="pf-av" id="pfAvatar">?</div>
+    <div class="pf-info">
+      <h1 id="pfName">—</h1>
+      <div class="handle" id="pfEmail">—</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:8px">
+      <button class="pf-edit" id="pfEditBtn">Edit profile</button>
+      <button class="pf-edit" id="pfPushBtn">🔔 Enable notifications</button>
+    </div>
+  </div>
+
+  <p class="pf-bio" id="pfBio"></p>
+  <div class="pf-domains" id="pfDomains"></div>
+
+  <div class="pf-stats">
+    <div><b id="statPosts">0</b><span>Posts</span></div>
+    <div><b id="statVotes">0</b><span>Votes cast</span></div>
+    <div><b id="statReacts">0</b><span>Reactions</span></div>
+    <div><b id="statComments">0</b><span>Comments</span></div>
+  </div>
+
+  <div class="pf-tabs">
+    <button class="on" data-tab="posts">Your posts</button>
+  </div>
+
+  <div class="pf-grid" id="pfGrid"></div>
+</div>
+
+<!-- reuse the same edit-profile modal as the app shell -->
+<div class="overlay" id="profileOverlay">
+  <div class="modal">
+    <h2>Edit profile</h2>
+    <div class="field"><label>Name</label><input id="pName" disabled></div>
+    <div class="field"><label>Email</label><input id="pEmail" disabled></div>
+    <div class="field profile-image-field">
+      <label for="pAvatarFile">Profile picture</label>
+      <div class="profile-image-control">
+        <img id="pAvatarPreview" alt="Profile picture preview" hidden>
+        <input id="pAvatarFile" type="file" accept="image/jpeg,image/png,image/webp">
+        <button class="image-remove" id="pAvatarRemove" type="button" hidden>Remove</button>
+      </div>
+    </div>
+    <div class="field profile-image-field">
+      <label for="pCoverFile">Cover picture</label>
+      <div class="profile-image-control">
+        <img id="pCoverPreview" alt="Cover picture preview" hidden>
+        <input id="pCoverFile" type="file" accept="image/jpeg,image/png,image/webp">
+        <button class="image-remove" id="pCoverRemove" type="button" hidden>Remove</button>
+      </div>
+    </div>
+    <div class="field"><label>Bio</label><textarea id="pBio" maxlength="280" placeholder="Say something about what you follow"></textarea></div>
+    <div class="field">
+      <label>Domains you follow</label>
+      <div class="dom-check" id="pDomains">
+        <label><input type="checkbox" value="tech">Tech</label>
+        <label><input type="checkbox" value="finance">Finance</label>
+        <label><input type="checkbox" value="health">Health</label>
+        <label><input type="checkbox" value="music">Music</label>
+        <label><input type="checkbox" value="fashion">Fashion</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="pCancel">Close</button>
+      <button class="btn-save" id="pSave">Save</button>
+    </div>
+    <button class="btn-logout" id="pLogout">Log out</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script src="feed.js"></script>
+<script src="profile.js"></script>
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg;
+  t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+(async function boot() {
+  if (!Trend.requireAuthOrRedirect()) return;
+  const domainColor = { tech:'var(--tech)', finance:'var(--finance)', health:'var(--health)', music:'var(--music)', fashion:'var(--fashion)' };
+  const domainBg = { tech:'var(--tech-bg)', finance:'var(--finance-bg)', health:'var(--health-bg)', music:'var(--music-bg)', fashion:'var(--fashion-bg)' };
+
+  let me;
+  try {
+    me = await Trend.api('/api/me');
+  } catch (e) {
+    Trend.clearSession();
+    location.href = 'login.html';
+    return;
+  }
+  Profile.render(me);
+
+  const stats = await Trend.api('/api/me/stats');
+  document.getElementById('statPosts').textContent = stats.posts;
+  document.getElementById('statVotes').textContent = stats.votesCast;
+  document.getElementById('statReacts').textContent = stats.reactsGiven;
+  document.getElementById('statComments').textContent = stats.comments;
+
+  const myPosts = await Trend.api('/api/me/posts');
+  const grid = document.getElementById('pfGrid');
+  grid.innerHTML = myPosts.length ? myPosts.map(p => `
+    <div class="pf-cell">
+      <img src="${Feed.escapeHtml(Feed.imageForPost(p))}" onerror="this.onerror=null;this.src='${Feed.escapeHtml(Feed.fallbackImageForPost(p))}'">
+      <span class="pf-tag" style="color:${domainColor[p.domain]}">${Feed.domainLabel(p.domain)}</span>
+      <div class="scrim"></div>
+      <p>${Feed.escapeHtml(p.text.length > 70 ? p.text.slice(0,67)+'…' : p.text)}</p>
+    </div>`).join('') : '<div class="pf-empty" style="grid-column:1/-1">You haven\'t posted anything yet. Head to the feed and share a take.</div>';
+
+  document.getElementById('avatarBtn').addEventListener('click', () => location.href='profile.html');
+  document.getElementById('pfEditBtn').addEventListener('click', () => window.Profile.open());
+  document.getElementById('pfPushBtn').addEventListener('click', async (e) => {
+    const btn = e.target;
+    btn.disabled = true; btn.textContent = 'Enabling…';
+    try {
+      await Trend.enablePush();
+      btn.textContent = '🔔 Notifications on';
+    } catch (err) {
+      showToast(err.message);
+      btn.disabled = false; btn.textContent = '🔔 Enable notifications';
+    }
+  });
+})();
+</script>
+</body>
+</html>

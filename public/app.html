@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="top">
+  <div class="nav-in">
+    <div class="logo">trend</div>
+    <div class="tabs" id="tabs">
+      <button data-tab="feed" class="on">Feed</button>
+      <button data-tab="foryou">For You</button>
+      <button data-tab="leaderboard">Leaderboard</button>
+      <button data-tab="markets">Markets</button>
+      <button data-tab="chat">Ask Trend</button>
+    </div>
+    <button class="avatar-btn" id="avatarBtn">?</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- FEED -->
+  <section class="blk" id="tab-feed">
+    <div class="composer">
+      <textarea id="postText" placeholder="What are you seeing? Write it as a claim to let people vote true/false."></textarea>
+      <div class="composer-meta"><span id="postWordCount">0 / 1,000 words</span></div>
+      <div class="media-preview" id="mediaPreview" style="display:none">
+        <img id="mediaPreviewImg" style="display:none">
+        <video id="mediaPreviewVid" style="display:none" controls></video>
+        <button id="mediaRemove" type="button">✕</button>
+      </div>
+      <div class="composer-row">
+        <select id="postDomain">
+          <option value="tech">Tech</option><option value="finance">Finance</option><option value="health">Health</option>
+          <option value="music">Music</option><option value="fashion">Fashion</option>
+        </select>
+        <select id="postType">
+          <option value="claim">Claim (gets a vote)</option><option value="take">Take (reactions only)</option><option value="update">Update / news</option>
+        </select>
+        <label class="media-btn" for="mediaInput" title="Add photo or video">📷</label>
+        <input type="file" id="mediaInput" accept="image/*,video/*" hidden>
+        <button class="post" id="postBtn">Post</button>
+      </div>
+    </div>
+
+    <div class="filters" id="filters">
+      <button class="chip on" data-domain="all">All</button>
+      <button class="chip" data-domain="tech">Tech</button>
+      <button class="chip" data-domain="finance">Finance</button>
+      <button class="chip" data-domain="health">Health</button>
+      <button class="chip" data-domain="music">Music</button>
+      <button class="chip" data-domain="fashion">Fashion</button>
+    </div>
+
+    <div id="feedList"></div>
+  </section>
+
+  <!-- FOR YOU -->
+  <section class="blk" id="tab-foryou" style="display:none">
+    <div id="foryouList"></div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="blk" id="tab-leaderboard" style="display:none">
+    <div class="filters" id="lbFilters">
+      <button class="chip on" data-period="week">This week</button>
+      <button class="chip" data-period="day">Today</button>
+      <button class="chip" data-period="month">This month</button>
+    </div>
+    <div id="leaderboardList"></div>
+  </section>
+
+  <!-- MARKETS -->
+  <section class="blk" id="tab-markets" style="display:none">
+    <div class="mk">
+      <div class="card wl" id="wl"></div>
+      <div class="card det" id="det"></div>
+    </div>
+  </section>
+
+  <!-- CHAT -->
+  <section class="blk" id="tab-chat" style="display:none">
+    <div class="chatwrap">
+      <div class="chatlog" id="chatlog"></div>
+      <div class="chatbar">
+        <input id="chatInput" type="text" placeholder="Ask about AI chips, GLP-1, resale fashion, music...">
+        <button id="chatSend">Send</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script src="feed.js"></script>
+<script src="foryou.js"></script>
+<script src="leaderboard.js"></script>
+<script src="markets.js"></script>
+<script src="chat.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are you into? — Trend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .ob-wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .ob-card{ width:100%; max-width:560px; }
+  .ob-step{ font-size:13px; font-weight:700; color:var(--accent); margin-bottom:10px; }
+  .ob-card h1{ font-size:30px; letter-spacing:-.03em; margin:0 0 8px; }
+  .ob-card p.sub{ color:var(--muted); font-size:15px; margin:0 0 28px; }
+  .ob-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:28px; }
+  .ob-opt{ display:flex; align-items:center; gap:12px; padding:16px; border-radius:16px; border:2px solid var(--line); background:#fff; cursor:pointer; transition:border-color .15s, transform .15s; text-align:left; }
+  .ob-opt:hover{ transform:translateY(-2px); }
+  .ob-opt.on{ border-color:var(--ink); background:var(--soft); }
+  .ob-opt .ico{ width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .ob-opt b{ font-size:14.5px; display:block; } .ob-opt span{ font-size:12px; color:var(--muted); }
+  .ob-actions{ display:flex; gap:10px; }
+  .ob-skip{ background:none; border:0; color:var(--muted); font-weight:700; font-size:14px; padding:13px; }
+  .ob-continue{ flex:1; background:var(--ink); color:var(--on-ink); border:0; border-radius:12px; padding:14px; font-weight:700; font-size:15px; transition:transform .15s, opacity .15s; }
+  .ob-continue:disabled{ opacity:.4; }
+  .ob-continue:not(:disabled):hover{ transform:translateY(-1px); }
+</style>
+</head>
+<body>
+<div class="ob-wrap">
+  <div class="ob-card">
+    <div class="ob-step">Step 1 of 1</div>
+    <h1>What are you here to follow?</h1>
+    <p class="sub">Pick a few — this decides what shows up first in your feed and daily reads. You can change this anytime from your profile.</p>
+    <div class="ob-grid" id="obGrid">
+      <button class="ob-opt" data-d="tech"><div class="ico" style="background:var(--tech-bg)">💻</div><div><b>Tech</b><span>AI, chips, startups</span></div></button>
+      <button class="ob-opt" data-d="finance"><div class="ico" style="background:var(--finance-bg)">📈</div><div><b>Finance</b><span>Markets, valuations</span></div></button>
+      <button class="ob-opt" data-d="health"><div class="ico" style="background:var(--health-bg)">💊</div><div><b>Health</b><span>Drugs, wellness, biotech</span></div></button>
+      <button class="ob-opt" data-d="music"><div class="ico" style="background:var(--music-bg)">🎵</div><div><b>Music</b><span>Streaming, releases</span></div></button>
+      <button class="ob-opt" data-d="fashion"><div class="ico" style="background:var(--fashion-bg)">👗</div><div><b>Fashion</b><span>Resale, brands, trends</span></div></button>
+    </div>
+    <div class="ob-actions">
+      <button class="ob-skip" id="obSkip">Skip for now</button>
+      <button class="ob-continue" id="obContinue" disabled>Continue</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+if (!Trend.requireAuthOrRedirect()) { /* redirected */ } else {
+  const selected = new Set();
+  const grid = document.getElementById('obGrid');
+  const cont = document.getElementById('obContinue');
+
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ob-opt');
+    if (!btn) return;
+    const d = btn.dataset.d;
+    if (selected.has(d)) { selected.delete(d); btn.classList.remove('on'); }
+    else { selected.add(d); btn.classList.add('on'); }
+    cont.disabled = selected.size === 0;
+  });
+
+  async function finish(domains) {
+    try { await Trend.api('/api/me', 'PUT', { domains }); } catch (e) { /* non-fatal, just continue */ }
+    location.href = 'app.html';
+  }
+
+  cont.addEventListener('click', () => finish([...selected]));
+  document.getElementById('obSkip').addEventListener('click', () => finish(['tech', 'finance']));
+}
+</script>
+</body>
+</html>
